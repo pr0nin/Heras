@@ -32,6 +32,7 @@ namespace Signus0x539.Heras
         public MainPage()
         {
             this.InitializeComponent();
+            IpAdress.Text = "192.168.1.105";
             discovery = new HeosSSDP();
             api = new HeosAPI();
 
@@ -56,9 +57,13 @@ namespace Signus0x539.Heras
             await GetCurrentSong("-768839342");
         }
 
-
         private async void Get_Playing(object sender, RoutedEventArgs args)
         {
+            if (string.IsNullOrEmpty(mainDeviceIp) && !string.IsNullOrEmpty(IpAdress.Text))
+            {
+                mainDeviceIp = IpAdress.Text;
+            }
+
             await GetCurrentSong("-768839342");
         }
 
