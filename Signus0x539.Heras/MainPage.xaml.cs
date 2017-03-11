@@ -32,11 +32,18 @@ namespace Signus0x539.Heras
         public MainPage()
         {
             this.InitializeComponent();
-            IpAdress.Text = "192.168.1.105";
             discovery = new HeosSSDP();
             api = new HeosAPI();
 
-            Task.Run( async () => await Init());
+            try
+            {
+                Task.Run(async () => await Init());
+
+            }
+            catch (Exception exeption)
+            {
+                // OH NOES!
+            }
         }
 
         private async Task Init()
@@ -49,9 +56,9 @@ namespace Signus0x539.Heras
             var commandTask = api.SendCommand(mainDeviceIp,
                 HeosAction.Register_For_Change_Events,
                 new List<KeyValuePair<string, string>>
-                {
-                new KeyValuePair<string, string>("enable", "off")
-                });
+                    {
+                        new KeyValuePair<string, string>("enable", "off")
+                    });
 
             await Task.WhenAll(commandTask);
             await GetCurrentSong("-768839342");
@@ -59,11 +66,6 @@ namespace Signus0x539.Heras
 
         private async void Get_Playing(object sender, RoutedEventArgs args)
         {
-            if (string.IsNullOrEmpty(mainDeviceIp) && !string.IsNullOrEmpty(IpAdress.Text))
-            {
-                mainDeviceIp = IpAdress.Text;
-            }
-
             await GetCurrentSong("-768839342");
         }
 
@@ -90,13 +92,13 @@ namespace Signus0x539.Heras
 
         private async Task GetCurrentSong(string pid)
         {
-            if(string.IsNullOrEmpty(mainDeviceIp)) { return; }
+            if (string.IsNullOrEmpty(mainDeviceIp)) { return; }
 
             try
             {
                 string result = await api.SendCommand(
-                                            mainDeviceIp, 
-                                            HeosAction.Get_Now_Playing_Media, 
+                                            mainDeviceIp,
+                                            HeosAction.Get_Now_Playing_Media,
                                             new List<KeyValuePair<string, string>>
                                                 {
                                                     new KeyValuePair<string, string>("pid",pid)

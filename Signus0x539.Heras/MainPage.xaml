@@ -22,14 +22,12 @@
         <Border Grid.Row="1" Grid.ColumnSpan="2"/>
         <StackPanel Orientation="Horizontal"
             HorizontalAlignment="Center" VerticalAlignment="Center">
-            <TextBlock FontSize="25" Height="75">Test for å set hva som står</TextBlock>
         </StackPanel>
         <Viewbox Grid.Row="1"  Grid.Column="1">
             <Image Name="AlbumCover"></Image>
         </Viewbox>
         <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal"
             HorizontalAlignment="Center" VerticalAlignment="Center">
-            <TextBox Name="IpAdress"></TextBox>
             <Button TabIndex="2" Background="Azure" Margin="0,0,10,0" Click="Get_Playing">Get now playing</Button>
             <Button TabIndex="1" Background="Azure" Margin="10,0,0,0"  Click="Play_Next" Width="128" >Play next</Button>
         </StackPanel>
