@@ -11,6 +11,23 @@ namespace Signus0x539.Heras
     {
         public List<SsdpRootDevice> Devices = new List<SsdpRootDevice>();
 
+        public string GetMainIp()
+        {
+            string mainIp = string.Empty;
+
+            if (Devices.Any())
+            {
+                var firstDevice = Devices.FirstOrDefault();
+
+                if(firstDevice != null && firstDevice.Location != null)
+                {
+                    mainIp = firstDevice.Location.DnsSafeHost;
+                }
+            }
+
+            return mainIp;
+        }
+
         public async Task LocateHeosDevices()
         {
             using (var deviceLocator = new SsdpDeviceLocator())

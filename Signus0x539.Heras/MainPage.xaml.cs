@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -49,7 +50,7 @@ namespace Signus0x539.Heras
         private async Task Init()
         {
             await discovery.LocateHeosDevices();
-            mainDeviceIp = discovery.Devices.FirstOrDefault()?.Location?.DnsSafeHost;
+            mainDeviceIp = discovery.GetMainIp();
 
             if (string.IsNullOrEmpty(mainDeviceIp)) { return; }
 
@@ -75,7 +76,7 @@ namespace Signus0x539.Heras
 
             try
             {
-                string result = await api.SendCommand(
+                var commandTask = api.SendCommand(
                                             mainDeviceIp,
                                             HeosAction.Play_Next,
                                             new List<KeyValuePair<string, string>>
@@ -83,6 +84,15 @@ namespace Signus0x539.Heras
                                                     new KeyValuePair<string, string>("pid", "-768839342")
                                                 });
 
+
+                await Task.WhenAll(commandTask);
+                if (string.IsNullOrEmpty(commandTask.Result)) { return; }
+
+                await Task.Run( async () =>
+                {
+                    await Task.Delay(5000);
+                    await GetCurrentSong("-768839342");
+                });
             }
             catch (Exception exception)
             {
@@ -104,17 +114,23 @@ namespace Signus0x539.Heras
                                                     new KeyValuePair<string, string>("pid",pid)
                                                 });
 
-                dynamic json = JObject.Parse(result);
-                string albumUrl = json?.payload?.image_url;
+                if (string.IsNullOrEmpty(result)) { return; }
 
-                if (!string.IsNullOrEmpty(albumUrl))
+                JObject json = JObject.Parse(result);
+                if (json != null)
                 {
-                    //  http://stackoverflow.com/a/38150056
-                    await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                    var payload = json["payload"].Value<JObject>();
+                    string albumUrl = payload["image_url"].Value<string>();
+
+                    if (!string.IsNullOrEmpty(albumUrl))
                     {
-                        //UI code here
-                        AlbumCover.Source = new BitmapImage(new Uri(albumUrl, UriKind.Absolute));
-                    });
+                        //  http://stackoverflow.com/a/38150056
+                        await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                        {
+                            //UI code here
+                            AlbumCover.Source = new BitmapImage(new Uri(albumUrl, UriKind.Absolute));
+                        });
+                    }
                 }
             }
             catch (Exception exception)
