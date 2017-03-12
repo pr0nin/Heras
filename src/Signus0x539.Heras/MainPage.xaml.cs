@@ -29,6 +29,7 @@ namespace Signus0x539.Heras
         private HeosSSDP discovery;
         private HeosAPI api;
         private string mainDeviceIp = string.Empty;
+        private string mainPid = "-768839342";
 
         public MainPage()
         {
@@ -62,12 +63,22 @@ namespace Signus0x539.Heras
                     });
 
             await Task.WhenAll(commandTask);
-            await GetCurrentSong("-768839342");
+            await GetCurrentSong(mainPid);
+            await Task.Run(async () => await GetCurrentSongLoop());
+        }
+
+        private async Task GetCurrentSongLoop()
+        {
+            while (true)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(10));
+                await GetCurrentSong(mainPid);
+            }
         }
 
         private async void Get_Playing(object sender, RoutedEventArgs args)
         {
-            await GetCurrentSong("-768839342");
+            await GetCurrentSong(mainPid);
         }
 
         private async void Play_Next(object sender, RoutedEventArgs args)
@@ -81,7 +92,7 @@ namespace Signus0x539.Heras
                                             HeosAction.Play_Next,
                                             new List<KeyValuePair<string, string>>
                                                 {
-                                                    new KeyValuePair<string, string>("pid", "-768839342")
+                                                    new KeyValuePair<string, string>("pid", mainPid)
                                                 });
 
 
@@ -91,7 +102,7 @@ namespace Signus0x539.Heras
                 await Task.Run( async () =>
                 {
                     await Task.Delay(5000);
-                    await GetCurrentSong("-768839342");
+                    await GetCurrentSong(mainPid);
                 });
             }
             catch (Exception exception)
@@ -128,7 +139,11 @@ namespace Signus0x539.Heras
                         await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                         {
                             //UI code here
-                            AlbumCover.Source = new BitmapImage(new Uri(albumUrl, UriKind.Absolute));
+                            var albumUri = new Uri(albumUrl, UriKind.Absolute);
+                            if (AlbumCover.BaseUri.AbsoluteUri != albumUri.AbsoluteUri)
+                            {
+                                AlbumCover.Source = new BitmapImage(albumUri);
+                            }
                         });
                     }
                 }
